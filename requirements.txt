@@ -1,0 +1,13 @@
+streamlit
+pandas
+numpy
+scikit-learn
+xgboost
+nltk
+pymongo
+plotly
+matplotlib
+python-dotenv
+groq
+fpdf2
+wordcloud
