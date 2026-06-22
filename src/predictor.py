@@ -8,16 +8,29 @@ VEC_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
 try:
     with open(META_PATH, 'r') as f:
         model_filename = f.read().strip()
-    MODEL_PATH = os.path.join(MODEL_DIR, model_filename)
+    # Check if a .gz version exists
+    if os.path.exists(os.path.join(MODEL_DIR, model_filename + ".gz")):
+        MODEL_PATH = os.path.join(MODEL_DIR, model_filename + ".gz")
+    else:
+        MODEL_PATH = os.path.join(MODEL_DIR, model_filename)
 except FileNotFoundError:
-    MODEL_PATH = os.path.join(MODEL_DIR, "best_model_random_forest.pkl")
+    if os.path.exists(os.path.join(MODEL_DIR, "best_model_random_forest.pkl.gz")):
+        MODEL_PATH = os.path.join(MODEL_DIR, "best_model_random_forest.pkl.gz")
+    else:
+        MODEL_PATH = os.path.join(MODEL_DIR, "best_model_random_forest.pkl")
 
 model = None
 vectorizer = None
 
 try:
-    with open(MODEL_PATH, 'rb') as f:
-        model = pickle.load(f)
+    import gzip
+    if MODEL_PATH.endswith('.gz'):
+        with gzip.open(MODEL_PATH, 'rb') as f:
+            model = pickle.load(f)
+    else:
+        with open(MODEL_PATH, 'rb') as f:
+            model = pickle.load(f)
+            
     with open(VEC_PATH, 'rb') as f:
         vectorizer = pickle.load(f)
 except Exception as e:
