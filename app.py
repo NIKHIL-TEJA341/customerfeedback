@@ -12,7 +12,6 @@ st.set_page_config(
 from src.ui_utils import load_css
 load_css()
 
-# Helper function to read image as base64
 def get_base64_of_bin_file(bin_file):
     if os.path.exists(bin_file):
         with open(bin_file, 'rb') as f:
@@ -20,12 +19,10 @@ def get_base64_of_bin_file(bin_file):
         return base64.b64encode(data).decode()
     return ""
 
-# Path to the generated image
 hero_img_path = os.path.join(os.path.dirname(__file__), "appimg.png")
 hero_img_b64 = get_base64_of_bin_file(hero_img_path)
 img_html = f'<img src="data:image/png;base64,{hero_img_b64}" style="width: 100%; max-width: 400px; border-radius: 12px; filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));">' if hero_img_b64 else ''
 
-# 1. Hero Section Card
 st.markdown(f"""
 <style>
 .hover-card {{
@@ -63,7 +60,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Metric Cards Row
 st.markdown("""
 <style>
 .custom-metric-container {
@@ -96,6 +92,29 @@ st.markdown("""
     justify-content: center;
 }
 </style>
+""", unsafe_allow_html=True)
+
+from src.database import get_all_reviews
+import pandas as pd
+
+reviews = get_all_reviews()
+total_reviews = len(reviews)
+pos_rate = 0
+neg_rate = 0
+active_products = 0
+
+if total_reviews > 0:
+    df = pd.DataFrame(reviews)
+    if 'sentiment' in df.columns:
+        pos_count = len(df[df['sentiment'] == 'Positive'])
+        neg_count = len(df[df['sentiment'] == 'Negative'])
+        pos_rate = round((pos_count / total_reviews) * 100)
+        neg_rate = round((neg_count / total_reviews) * 100)
+    
+    if 'product' in df.columns:
+        active_products = df['product'].replace('', pd.NA).dropna().nunique()
+
+st.markdown(f"""
 <div class="custom-metric-container">
     <div class="custom-metric-card">
         <div class="metric-icon-box" style="background-color: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
@@ -103,7 +122,7 @@ st.markdown("""
         </div>
         <div>
             <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Reviews Processed</div>
-            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">125K+</div>
+            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">{total_reviews}</div>
             <div style="display: inline-block; background-color: rgba(16, 185, 129, 0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">&uarr; Live</div>
         </div>
     </div>
@@ -112,19 +131,17 @@ st.markdown("""
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#10B981" width="32" height="32"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
         </div>
         <div>
-            <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Negative Rate</div>
-            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">4%</div>
-            <div style="display: inline-block; background-color: rgba(16, 185, 129, 0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">&darr; -1.2%</div>
+            <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Positive Rate</div>
+            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">{pos_rate}%</div>
         </div>
     </div>
     <div class="custom-metric-card">
-        <div class="metric-icon-box" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" width="32" height="32"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 3c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"/></svg>
+        <div class="metric-icon-box" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EF4444" width="32" height="32"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 3c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"/></svg>
         </div>
         <div>
-            <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Positive Rate</div>
-            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">88%</div>
-            <div style="display: inline-block; background-color: rgba(16, 185, 129, 0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">&uarr; up</div>
+            <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Negative Rate</div>
+            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">{neg_rate}%</div>
         </div>
     </div>
     <div class="custom-metric-card">
@@ -133,13 +150,13 @@ st.markdown("""
         </div>
         <div>
             <div style="color: #94A3B8; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Active Products</div>
-            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">250+</div>
+            <div style="color: #F8FAFC; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px;">{active_products}</div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 3. Core Capabilities Grid
+
 st.markdown("""
 <div style="background-color: #0B1120; border: 1px solid #1E293B; border-radius: 16px; padding: 2rem;">
 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
