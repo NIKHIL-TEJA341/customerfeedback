@@ -72,19 +72,18 @@ if is_authenticated:
     reports_page = st.Page("app_pages/09_Reports_Center.py", title="Reports Center", icon="📑")
     about_page = st.Page("app_pages/10_About_Project.py", title="About Sentix AI", icon="ℹ️")
     
-    def sign_out_action():
-        st.title("Exiting Demo..." if is_demo else "Signing out...")
-        logout()
-        
-    logout_page = st.Page(sign_out_action, title="Exit Demo" if is_demo else "Sign Out", icon="🚪")
-    
     pg = st.navigation(
         {
             "Main Features": [dashboard_page, analyze_page, bulk_page, history_page],
             "Analytics": [product_page, trend_page, insights_page, wordcloud_page, reports_page],
-            "Account": [about_page, logout_page]
+            "Account": [about_page]
         }
     )
+    
+    st.sidebar.markdown("---")
+    if st.sidebar.button("🚪 Exit Demo" if is_demo else "🚪 Sign Out", use_container_width=True):
+        logout()
+        
     pg.run()
     st.stop()
 
