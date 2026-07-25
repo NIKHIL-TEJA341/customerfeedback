@@ -11,3 +11,5 @@ python-dotenv
 groq
 fpdf2
 wordcloud
+streamlit-cookies-controller
+requests

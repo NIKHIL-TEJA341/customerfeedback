@@ -12,3 +12,13 @@ Thumbs.db
 .pytest_cache/
 /data/
 models/best_model_random_forest.pkl
+
+# Ignore development scripts and notes
+src/ml_pipeline.py
+compress_model.py
+fix_pages.py
+progress_and_plan.txt
+pages/
+
+# Ignore sensitive credentials
+google_credentials.json

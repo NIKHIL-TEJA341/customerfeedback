@@ -10,7 +10,66 @@ st.set_page_config(
 )
 
 from src.ui_utils import load_css
+from src.auth import init_session_state, check_authentification, check_auth, login, logout
+
 load_css()
+init_session_state()
+check_authentification()
+is_authenticated = check_auth()
+
+if is_authenticated:
+    # --- Authenticated App Mode ---
+    
+    # Inject Custom Logo
+    st.sidebar.markdown("""
+        <div class="top-sidebar-logo" style="display: flex; align-items: center; margin-bottom: 1rem; padding: 1.25rem 1rem; background-color: #050810; border: 1px solid #1E293B; border-radius: 16px; box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4);">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px;">
+                <path d="M12 2L14.26 8.74L21 11L14.26 13.26L12 20L9.74 13.26L3 11L9.74 8.74L12 2Z" fill="#A855F7"/>
+            </svg>
+            <div>
+                <div style="color: #F8FAFC; font-size: 1.4rem; font-weight: 800; line-height: 1.2;">Sentix AI</div>
+                <div style="color: #94A3B8; font-size: 0.8rem; font-weight: 500;">Customer Sentiment</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    dashboard_page = st.Page("app_pages/01_Dashboard.py", title="Dashboard", icon="📊", default=True)
+    analyze_page = st.Page("app_pages/02_Analyze_Feedback.py", title="Analyze Single", icon="🔍")
+    bulk_page = st.Page("app_pages/03_Bulk_Analysis.py", title="Bulk CSV Analysis", icon="📁")
+    history_page = st.Page("app_pages/04_Feedback_History.py", title="Feedback History", icon="⏳")
+    product_page = st.Page("app_pages/05_Product_Analytics.py", title="Product Analytics", icon="📦")
+    trend_page = st.Page("app_pages/06_Trend_Monitoring.py", title="Trend Monitoring", icon="📈")
+    insights_page = st.Page("app_pages/07_AI_Insights_Center.py", title="AI Insights", icon="🧠")
+    wordcloud_page = st.Page("app_pages/08_Word_Cloud_Analytics.py", title="Word Cloud", icon="☁️")
+    reports_page = st.Page("app_pages/09_Reports_Center.py", title="Reports Center", icon="📑")
+    about_page = st.Page("app_pages/10_About_Project.py", title="About Sentix AI", icon="ℹ️")
+    
+    is_demo = st.session_state.get('demo_mode', False)
+    
+    def sign_out_action():
+        st.title("Exiting Demo..." if is_demo else "Signing out...")
+        logout()
+        
+    logout_page = st.Page(sign_out_action, title="Exit Demo" if is_demo else "Sign Out", icon="🚪")
+    
+    pg = st.navigation(
+        {
+            "Main Features": [dashboard_page, analyze_page, bulk_page, history_page],
+            "Analytics": [product_page, trend_page, insights_page, wordcloud_page, reports_page],
+            "Account": [about_page, logout_page]
+        }
+    )
+    pg.run()
+    st.stop()
+
+# --- Landing Page Mode ---
+# Hide sidebar completely
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] { display: none; }
+        [data-testid="collapsedControl"] { display: none; }
+    </style>
+""", unsafe_allow_html=True)
 
 def get_base64_of_bin_file(bin_file):
     if os.path.exists(bin_file):
@@ -47,18 +106,23 @@ st.markdown(f"""
         <p style="color: #94A3B8; font-size: 1rem; line-height: 1.6; margin-bottom: 2rem;">
             Decipher the emotional pulse of your global customer base. Sentix AI uses advanced linguistics to process millions of reviews, turning subjective noise into objective strategy.
         </p>
-        <div style="display: flex; gap: 1rem;">
-            <a href="/Analyze_Feedback" target="_self" class="hover-btn" style="background: linear-gradient(90deg, #6366F1, #A855F7); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);">Analyze Feedback &rarr;</a>
-            <a href="/Dashboard" target="_self" class="hover-btn" style="background-color: transparent; border: 1px solid #334155; color: #F8FAFC; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">View Dashboard 
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F8FAFC" width="18" height="18"><path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/></svg>
-            </a>
-        </div>
     </div>
     <div style="flex: 0 0 320px; display: flex; justify-content: flex-end;">
         {img_html}
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("### 🚀 Get Started")
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🚀 Try Demo Mode (Read-Only)", use_container_width=True):
+        st.session_state['demo_mode'] = True
+        st.rerun()
+        
+with col2:
+    login()
 
 st.markdown("""
 <style>
