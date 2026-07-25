@@ -4,7 +4,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI")
+try:
+    import streamlit as st
+    MONGO_URI = st.secrets["MONGO_URI"]
+except Exception:
+    MONGO_URI = os.getenv("MONGO_URI")
 client = None
 db = None
 reviews_col = None

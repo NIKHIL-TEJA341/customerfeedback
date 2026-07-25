@@ -9,9 +9,14 @@ load_dotenv()
 
 cookie_controller = CookieController()
 
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI", "http://localhost:8501")
+try:
+    CLIENT_ID = st.secrets["GOOGLE_CLIENT_ID"]
+    CLIENT_SECRET = st.secrets["GOOGLE_CLIENT_SECRET"]
+    REDIRECT_URI = st.secrets["REDIRECT_URI"]
+except Exception:
+    CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    REDIRECT_URI = os.getenv("REDIRECT_URI", "http://localhost:8501")
 
 def init_session_state():
     # Try to load from cookie first
