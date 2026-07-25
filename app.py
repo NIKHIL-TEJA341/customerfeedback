@@ -33,6 +33,34 @@ if is_authenticated:
         </div>
     """, unsafe_allow_html=True)
 
+    # Show user info card in sidebar
+    is_demo = st.session_state.get('demo_mode', False)
+    user_info = st.session_state.get('user_info', {})
+    if is_demo:
+        st.sidebar.markdown("""
+            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05)); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 1.5rem;">👀</div>
+                <div>
+                    <div style="color: #F59E0B; font-weight: 700; font-size: 0.9rem;">Demo Mode</div>
+                    <div style="color: #94A3B8; font-size: 0.75rem;">Read-only access</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    elif user_info:
+        name = user_info.get('name', 'User')
+        email = user_info.get('email', '')
+        picture = user_info.get('picture', '')
+        avatar_html = f'<img src="{picture}" style="width:36px;height:36px;border-radius:50%;border:2px solid #A855F7;" />' if picture else f'<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#A855F7);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem;">{name[0].upper()}</div>'
+        st.sidebar.markdown(f"""
+            <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(79,70,229,0.05)); border: 1px solid rgba(168,85,247,0.25); border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                {avatar_html}
+                <div style="overflow:hidden;">
+                    <div style="color: #F8FAFC; font-weight: 700; font-size: 0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{name}</div>
+                    <div style="color: #94A3B8; font-size: 0.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{email}</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
     dashboard_page = st.Page("app_pages/01_Dashboard.py", title="Dashboard", icon="📊", default=True)
     analyze_page = st.Page("app_pages/02_Analyze_Feedback.py", title="Analyze Single", icon="🔍")
     bulk_page = st.Page("app_pages/03_Bulk_Analysis.py", title="Bulk CSV Analysis", icon="📁")
@@ -43,8 +71,6 @@ if is_authenticated:
     wordcloud_page = st.Page("app_pages/08_Word_Cloud_Analytics.py", title="Word Cloud", icon="☁️")
     reports_page = st.Page("app_pages/09_Reports_Center.py", title="Reports Center", icon="📑")
     about_page = st.Page("app_pages/10_About_Project.py", title="About Sentix AI", icon="ℹ️")
-    
-    is_demo = st.session_state.get('demo_mode', False)
     
     def sign_out_action():
         st.title("Exiting Demo..." if is_demo else "Signing out...")

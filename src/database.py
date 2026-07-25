@@ -28,9 +28,9 @@ def insert_review(review_data):
         reviews_col.insert_one(review_data)
 
 def get_all_reviews():
-    """Fetches original records for Demo Mode (records without user_email)."""
+    """Fetches ALL records for Demo Mode — so demo users always see real sample data."""
     if reviews_col is not None:
-        return list(reviews_col.find({"user_email": {"$exists": False}}, {"_id": 0}))
+        return list(reviews_col.find({}, {"_id": 0}))
     return []
 
 def insert_bulk_reviews(reviews_list):

@@ -2,15 +2,9 @@ import streamlit as st
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from src.ui_utils import load_css
-load_css()
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from src.database import get_all_reviews, get_user_reviews
 from src.auth import require_auth, get_current_user_email
 

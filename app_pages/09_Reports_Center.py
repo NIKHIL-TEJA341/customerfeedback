@@ -2,15 +2,10 @@ import streamlit as st
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from src.ui_utils import load_css
-load_css()
 import pandas as pd
 from fpdf import FPDF
 import datetime
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import io
 from src.database import get_all_reviews, get_user_reviews
 from src.auth import require_auth, get_current_user_email
 
@@ -65,9 +60,10 @@ else:
     
             pdf.set_font("Arial", 'I', 10)
             pdf.cell(200, 10, f"Generated on: {datetime.date.today()}", ln=1, align='C')
+            if user_email:
+                pdf.cell(200, 10, f"Account: {user_email}", ln=1, align='C')
             pdf.ln(10)
             
-
             pdf.set_font("Arial", 'B', 12)
             pdf.cell(200, 10, "Summary Metrics", ln=1)
             pdf.set_font("Arial", '', 11)
@@ -76,7 +72,6 @@ else:
             pdf.cell(200, 10, f"Negative Reviews: {neg} ({neg_rate:.1f}%)", ln=1)
             pdf.cell(200, 10, f"Neutral Reviews: {neu}", ln=1)
             pdf.ln(10)
-            
             
             pdf.set_font("Arial", 'B', 12)
             pdf.cell(200, 10, "Product Highlights", ln=1)
@@ -98,7 +93,6 @@ else:
                 
                 pdf.cell(200, 10, "Top Performing Products:", ln=1)
                 for prod in top_prods.index:
-                    
                     safe_prod = str(prod).encode('ascii', 'ignore').decode('ascii')
                     pdf.cell(200, 10, f"- {safe_prod}", ln=1)
             
@@ -106,16 +100,16 @@ else:
             pdf.set_font("Arial", 'I', 10)
             pdf.cell(200, 10, "Powered by Sentix AI Machine Learning Pipeline.", ln=1, align='C')
             
-            pdf_output_path = os.path.join(os.path.dirname(__file__), "Sentix_Report.pdf")
-            pdf.output(pdf_output_path)
-            
-            with open(pdf_output_path, "rb") as pdf_file:
-                pdf_bytes = pdf_file.read()
+            # Write to memory buffer — no disk access needed (works on Streamlit Cloud)
+            pdf_buffer = io.BytesIO()
+            pdf_bytes = pdf.output(dest='S').encode('latin-1')
+            pdf_buffer.write(pdf_bytes)
+            pdf_buffer.seek(0)
                 
             st.success("PDF Generated Successfully!")
             st.download_button(
                 label="📥 Download PDF Report",
-                data=pdf_bytes,
+                data=pdf_buffer,
                 file_name=f"Sentix_Report_{datetime.date.today()}.pdf",
                 mime="application/pdf"
             )

@@ -2,10 +2,6 @@ import streamlit as st
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from src.ui_utils import load_css
-load_css()
-
-
 from src.auth import require_auth
 require_auth()
 st.title("ℹ️ About Sentix AI")

@@ -7,7 +7,10 @@ from streamlit_cookies_controller import CookieController
 
 load_dotenv()
 
-cookie_controller = CookieController()
+def get_cookie_controller():
+    if 'cookie_controller' not in st.session_state:
+        st.session_state['cookie_controller'] = CookieController()
+    return st.session_state['cookie_controller']
 
 try:
     CLIENT_ID = st.secrets["GOOGLE_CLIENT_ID"]
@@ -20,6 +23,7 @@ except Exception:
 
 def init_session_state():
     # Try to load from cookie first
+    cookie_controller = get_cookie_controller()
     saved_email = cookie_controller.get('sentix_user_email')
     saved_name = cookie_controller.get('sentix_user_name')
     
@@ -85,9 +89,10 @@ def check_authentification():
                     "picture": user_info.get("picture")
                 }
                 
-                # Persist to cookie
-                cookie_controller.set('sentix_user_email', user_info.get("email"))
-                cookie_controller.set('sentix_user_name', user_info.get("name"))
+                # Persist to cookie (7 day expiry)
+                cookie_controller = get_cookie_controller()
+                cookie_controller.set('sentix_user_email', user_info.get("email"), max_age=604800)
+                cookie_controller.set('sentix_user_name', user_info.get("name"), max_age=604800)
                 
                 # Clear query parameters so a refresh doesn't trigger auth again
                 st.query_params.clear()
@@ -95,7 +100,7 @@ def check_authentification():
 
 def login():
     """Renders the Google Login button"""
-    st.markdown(f'<a href="{get_login_url()}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0.6rem 1.2rem; background-color:white; color:#334155; border:1px solid #CBD5E1; border-radius:8px; text-decoration:none; font-weight:600; font-size:1.05rem; width:100%; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:background-color 0.2s;"><svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</a>', unsafe_allow_html=True)
+    st.markdown(f'<a href="{get_login_url()}" target="_top" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0.6rem 1.2rem; background-color:white; color:#334155; border:1px solid #CBD5E1; border-radius:8px; text-decoration:none; font-weight:600; font-size:1.05rem; width:100%; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:background-color 0.2s;"><svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</a>', unsafe_allow_html=True)
 
 def logout():
     """Logs the user out"""
@@ -103,10 +108,12 @@ def logout():
     st.session_state.pop('user_info', None)
     st.session_state['demo_mode'] = False
     try:
+        cookie_controller = get_cookie_controller()
         cookie_controller.remove('sentix_user_email')
     except KeyError:
         pass
     try:
+        cookie_controller = get_cookie_controller()
         cookie_controller.remove('sentix_user_name')
     except KeyError:
         pass

@@ -2,14 +2,8 @@ import streamlit as st
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from src.ui_utils import load_css
-load_css()
 import pandas as pd
 import datetime
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from src.predictor import predict_sentiment
 from src.database import insert_bulk_reviews_for_user
 from src.auth import require_auth, get_current_user_email
