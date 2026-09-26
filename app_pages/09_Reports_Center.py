@@ -102,7 +102,7 @@ else:
             
             # Write to memory buffer — no disk access needed (works on Streamlit Cloud)
             pdf_buffer = io.BytesIO()
-            pdf_bytes = pdf.output(dest='S').encode('latin-1')
+            pdf_bytes = pdf.output()
             pdf_buffer.write(pdf_bytes)
             pdf_buffer.seek(0)
                 
